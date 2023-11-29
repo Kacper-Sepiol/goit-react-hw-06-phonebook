@@ -13,7 +13,7 @@ const COPY_CONTACTS = [
 ];
 
 export const App = () => {
-  // te dane musza znalezc sie w stanie store
+  // te dane musza znalezc sie w stanie
   const [contacts, setContacts] = useState([
     { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
     { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },

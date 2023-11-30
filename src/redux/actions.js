@@ -11,6 +11,8 @@ export const addContact = createAction('contact/addContact', (name, number) => {
   };
 });
 
+export const addFilterContact = createAction('contact/addFilterContact');
+
 export const deleteContact = createAction(
   'contact/deleteContact',
   contactId => {
@@ -19,3 +21,9 @@ export const deleteContact = createAction(
     };
   }
 );
+
+export const deleteAllContactsForFilter = createAction(
+  'contact/deleteAllContactsForFilter'
+);
+
+export const addFilter = createAction('filter/addFilter');

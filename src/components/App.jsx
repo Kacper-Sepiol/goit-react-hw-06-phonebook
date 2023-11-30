@@ -2,9 +2,13 @@ import React from 'react';
 import ContactForm from './contactForm/ContactForm';
 import ContactList from './contactList/ContactList';
 import Filter from './filter/Filter';
-import { nanoid } from 'nanoid';
-import { useState, useEffect } from 'react';
-import { addContact } from 'redux/actions';
+import { useEffect } from 'react';
+import {
+  addContact,
+  addFilter,
+  deleteAllContactsForFilter,
+  addFilterContact,
+} from 'redux/actions';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 
@@ -17,60 +21,32 @@ const COPY_CONTACTS = [
 
 export const App = () => {
   const dispatch = useDispatch();
-
-  // te dane musza znalezc sie w stanie jest
-  const [contacts, setContacts] = useState([
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ]);
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    console.log('komponent został zamontowany');
-    const contactsJSON = localStorage.getItem('contacts');
-    const contact = JSON.parse(contactsJSON);
-
-    // if (contact) {
-    //   // setContacts(contact);
-    //   // const names = contact.map(item => {
-    //   //   dispatch(addContact(item.name, item.number));
-    //   // });
-    // }
-  }, []);
-
+  const filter = useSelector(state => state.filter);
   const contact = useSelector(state => state.contacts);
 
   useEffect(() => {
-    console.log('komponent został zaktualizowany');
-    const contactsJSON = JSON.stringify(contact);
-    localStorage.setItem('contacts', contactsJSON);
-  }, [contact]);
+    const contactsJSON = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contactsJSON);
 
-  const handleChangeName = event => {
-    setName(event.currentTarget.value);
-  };
-
-  const handleChangeNumber = event => {
-    setNumber(event.currentTarget.value);
-  };
+    if (parsedContacts) {
+      dispatch(addFilterContact(parsedContacts));
+    }
+  }, [dispatch]);
 
   const handleChangeFilterField = evt => {
     const filterValue = evt.currentTarget.value.toLowerCase();
-
-    setFilter(filterValue);
+    dispatch(addFilter(filterValue));
 
     const filteredContacts = COPY_CONTACTS.filter(contact =>
       contact.name.toLowerCase().includes(filterValue)
     );
 
-    setContacts(filteredContacts);
+    dispatch(deleteAllContactsForFilter());
+
+    dispatch(addFilterContact(filteredContacts));
 
     if (evt.currentTarget.value === '') {
-      setContacts(COPY_CONTACTS);
+      dispatch(addFilterContact(COPY_CONTACTS));
     }
   };
 
@@ -83,42 +59,22 @@ export const App = () => {
 
     dispatch(addContact(name, number));
 
-    const nameExists = contacts.some(
+    const nameExists = contact.some(
       contact => contact.name.toLowerCase() === name.toLowerCase()
     );
 
     if (nameExists) {
-      alert('nie');
+      alert('ERROR');
       return;
     }
 
-    const newContact = { id: nanoid(), name, number };
-
-    setContacts(prevContacts => [...prevContacts, newContact]);
-    setName('');
-    setNumber('');
-
     form.reset();
-  };
-
-  const handleDeleteContact = id => {
-    const updateContacts = contacts.filter(contact => contact.id !== id);
-    setContacts(updateContacts);
-    const contactsJSON = JSON.stringify(updateContacts);
-    localStorage.setItem('contacts', contactsJSON);
   };
 
   return (
     <div>
       <h1>PhoneBook</h1>
-      <ContactForm
-        name={name}
-        number={number}
-        handleChangeName={handleChangeName}
-        handleChangeNumber={handleChangeNumber}
-        handleSubmit={handleSubmit}
-        sName={setName}
-      ></ContactForm>
+      <ContactForm handleSubmit={handleSubmit}></ContactForm>
 
       <h2>Contacts</h2>
       <Filter
@@ -126,10 +82,7 @@ export const App = () => {
         handleChangeFilterField={handleChangeFilterField}
       ></Filter>
 
-      <ContactList
-        contacts={contacts}
-        onDeleteContact={handleDeleteContact}
-      ></ContactList>
+      <ContactList contacts={contact}></ContactList>
     </div>
   );
 };

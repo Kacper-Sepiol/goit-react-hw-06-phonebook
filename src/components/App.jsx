@@ -4,6 +4,9 @@ import ContactList from './contactList/ContactList';
 import Filter from './filter/Filter';
 import { nanoid } from 'nanoid';
 import { useState, useEffect } from 'react';
+import { addContact } from 'redux/actions';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const COPY_CONTACTS = [
   { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
@@ -13,7 +16,9 @@ const COPY_CONTACTS = [
 ];
 
 export const App = () => {
-  // te dane musza znalezc sie w stanie
+  const dispatch = useDispatch();
+
+  // te dane musza znalezc sie w stanie jest
   const [contacts, setContacts] = useState([
     { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
     { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
@@ -29,16 +34,21 @@ export const App = () => {
     const contactsJSON = localStorage.getItem('contacts');
     const contact = JSON.parse(contactsJSON);
 
-    if (contact) {
-      setContacts(contact);
-    }
+    // if (contact) {
+    //   // setContacts(contact);
+    //   // const names = contact.map(item => {
+    //   //   dispatch(addContact(item.name, item.number));
+    //   // });
+    // }
   }, []);
+
+  const contact = useSelector(state => state.contacts);
 
   useEffect(() => {
     console.log('komponent został zaktualizowany');
-    const contactsJSON = JSON.stringify(contacts);
+    const contactsJSON = JSON.stringify(contact);
     localStorage.setItem('contacts', contactsJSON);
-  }, [contacts]);
+  }, [contact]);
 
   const handleChangeName = event => {
     setName(event.currentTarget.value);
@@ -68,6 +78,10 @@ export const App = () => {
     event.preventDefault();
 
     const form = event.target;
+    const name = form.elements.name.value;
+    const number = form.elements.number.value;
+
+    dispatch(addContact(name, number));
 
     const nameExists = contacts.some(
       contact => contact.name.toLowerCase() === name.toLowerCase()

@@ -29,7 +29,7 @@ const contactsReducer = createReducer(appState, builder => {
       const index = state.contacts.findIndex(
         contact => contact.id === action.payload
       );
-      if (index != -1) {
+      if (index !== -1) {
         state.contacts.splice(index, 1);
       }
     })
